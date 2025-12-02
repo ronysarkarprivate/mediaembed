@@ -3,6 +3,16 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#a855f7">
+    <meta name="description" content="Embed your Google Drive media - MediaEmbed">
+    
+    <!-- Favicons -->
+    <link rel="icon" type="image/png" sizes="32x32" href="favicon.ico">
+    <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
+    <link rel="icon" type="image/png" sizes="512x512" href="icon-512.png">
+    <link rel="apple-touch-icon" href="icon-192.png">
+    
+    <link rel="manifest" href="manifest.json">
     <title>Embed Media - MediaEmbed</title>
     <link rel="stylesheet" href="styles.css">
 </head>
@@ -18,31 +28,34 @@
             <ul class="nav-links">
                 <li><a href="index.html">Home</a></li>
                 <li><a href="embed.html" class="active">Embed Media</a></li>
+                <li><a href="#" onclick="window.location.href='index.html'; setTimeout(() => openCollectionsModal(), 500); return false;">Collections</a></li>
+                <li><a href="#" onclick="window.location.href='index.html'; setTimeout(() => openAnalyticsModal(), 500); return false;">Analytics</a></li>
+                <li><a href="#" onclick="window.location.href='index.html'; setTimeout(() => openTrashModal(), 500); return false;">🗑️ Trash</a></li>
             </ul>
         </div>
     </nav>
 
-    <main class="embed-section">
+    <section class="embed-section">
         <div class="form-container">
             <div class="form-header">
                 <h1>Embed Your Media</h1>
-                <p>Fill in the details below to embed your Google Drive content</p>
+                <p>Add iframe code from Google Drive or any other source</p>
             </div>
 
             <form id="embedForm" class="embed-form">
                 <div class="form-group">
                     <label for="iframeCode">
-                        <span class="label-text">Iframe Code</span>
+                        <span class="label-text">Iframe Embed Code</span>
                         <span class="label-required">*</span>
                     </label>
                     <textarea 
                         id="iframeCode" 
-                        name="iframeCode" 
-                        rows="4" 
-                        placeholder='<iframe src="..." width="640" height="480"></iframe>'
+                        rows="6" 
+                        placeholder='Paste your iframe code here, e.g.,
+<iframe src="https://drive.google.com/file/d/YOUR_FILE_ID/preview" width="640" height="480"></iframe>'
                         required
                     ></textarea>
-                    <small class="form-hint">💡 Category will be detected automatically from the URL</small>
+                    <span class="form-hint">💡 Get this from Google Drive: Right-click file → Share → Get embed code</span>
                 </div>
 
                 <div class="form-group">
@@ -53,29 +66,25 @@
                     <input 
                         type="text" 
                         id="mediaTitle" 
-                        name="mediaTitle" 
-                        placeholder="Enter a descriptive title"
+                        placeholder="e.g., Project Presentation 2025"
                         required
                     >
-                    <small class="form-hint" id="tagSuggestion" style="display: none; color: var(--accent);"></small>
                 </div>
 
                 <div class="form-group">
                     <label for="mediaDescription">
-                        <span class="label-text">Description</span>
+                        <span class="label-text">Description (Optional)</span>
                     </label>
                     <textarea 
                         id="mediaDescription" 
-                        name="mediaDescription" 
                         rows="3" 
-                        placeholder="Add a description for this media (optional)"
+                        placeholder="Add a brief description of this media..."
                     ></textarea>
-                    <small class="form-hint">Describe what this media is about</small>
                 </div>
 
                 <div class="form-row">
                     <div class="form-group">
-                        <label for="category">
+                        <label for="categoryInput">
                             <span class="label-text">Category</span>
                             <span class="label-required">*</span>
                         </label>
@@ -84,18 +93,18 @@
                                 type="text" 
                                 id="categoryInput" 
                                 list="categoryList"
-                                placeholder="Auto-detected or select"
+                                placeholder="Auto-detected or select..."
                                 required
                             >
                             <datalist id="categoryList">
-                                <option value="video">
-                                <option value="image">
-                                <option value="document">
-                                <option value="presentation">
-                                <option value="other">
+                                <option value="video">Video</option>
+                                <option value="image">Image</option>
+                                <option value="document">Document</option>
+                                <option value="presentation">Presentation</option>
+                                <option value="other">Other</option>
                             </datalist>
                         </div>
-                        <small class="form-hint">✨ Auto-detected from iframe URL</small>
+                        <span class="form-hint">🤖 Auto-detected from iframe code</span>
                     </div>
 
                     <div class="form-group">
@@ -105,57 +114,74 @@
                         <input 
                             type="text" 
                             id="tags" 
-                            name="tags" 
-                            placeholder="e.g., tutorial, marketing, presentation"
+                            placeholder="e.g., tutorial, marketing, Q4-2025"
                         >
-                        <small class="form-hint">Separate multiple tags with commas</small>
+                        <span class="form-hint" id="tagSuggestion" style="display: none; color: var(--accent);"></span>
                     </div>
                 </div>
 
                 <button type="submit" class="submit-button">
-                    <span>Embed Media</span>
                     <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
                         <path d="M10 5V15M5 10H15" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
                     </svg>
+                    <span>Embed Media</span>
                 </button>
             </form>
         </div>
 
+        <!-- Preview Container -->
         <div id="previewContainer" class="preview-container hidden">
             <div class="preview-header">
-                <h2>Embedded Media Preview</h2>
-                <button id="clearPreview" class="clear-button">Clear</button>
+                <h2>Preview</h2>
+                <button id="clearPreview" class="clear-button">Clear & Start New</button>
             </div>
-            
             <div class="preview-content">
                 <div class="preview-metadata">
-                    <h3 id="previewTitle"></h3>
+                    <h3 id="previewTitle">Media Title</h3>
                     <p id="previewDescription" class="preview-description"></p>
                     <div class="metadata-tags">
                         <span class="metadata-item">
                             <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
                                 <path d="M2 4H14M2 8H14M2 12H14" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
                             </svg>
-                            <span id="previewCategory"></span>
+                            <span id="previewCategory">Category</span>
                         </span>
-                        <span class="metadata-item" id="previewTagsContainer">
+                        <span class="metadata-item" id="previewTagsContainer" style="display: none;">
                             <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
                                 <path d="M2 8L8 2L14 8L8 14L2 8Z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>
                             </svg>
-                            <span id="previewTags"></span>
+                            <span id="previewTags">Tags</span>
+                        </span>
+                        <span class="metadata-item" style="background: rgba(16, 185, 129, 0.15); border-color: rgba(16, 185, 129, 0.3); color: #10b981;">
+                            <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                                <path d="M5 10L8.5 13.5L15 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                            </svg>
+                            <span>Saved Successfully</span>
                         </span>
                     </div>
                 </div>
-                
-                <div id="previewEmbed" class="preview-embed"></div>
+                <div class="preview-embed" id="previewEmbed">
+                    <!-- Embedded media will be displayed here -->
+                </div>
             </div>
         </div>
-    </main>
+    </section>
 
     <footer class="footer">
-        <p>&copy; 2025 MediaEmbed. Crafted with excellence.</p>
+        <p>&copy; 2025 MediaEmbed Pro. Crafted with excellence.</p>
     </footer>
 
     <script src="script.js"></script>
+    
+    <!-- PWA Service Worker Registration -->
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('sw.js')
+                    .then(reg => console.log('✅ Service Worker registered'))
+                    .catch(err => console.log('❌ Service Worker registration failed:', err));
+            });
+        }
+    </script>
 </body>
 </html>
