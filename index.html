@@ -1,0 +1,649 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#a855f7">
+    <meta name="description" content="MediaEmbed - Organize and embed your Google Drive media">
+    <link rel="manifest" href="manifest.json">
+    <link rel="apple-touch-icon" href="icon-192.png">
+    <title>Google Drive Media Embedder</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="background-gradient"></div>
+    
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="logo">
+                <span class="logo-icon">📁</span>
+                <span class="logo-text">MediaEmbed</span>
+            </div>
+            <ul class="nav-links">
+                <li><a href="index.html" class="active">Home</a></li>
+                <li><a href="embed.html">Embed Media</a></li>
+                <li><a href="#" onclick="openCollectionsModal(); return false;">Collections</a></li>
+                <li><a href="#" onclick="openAnalyticsModal(); return false;">Analytics</a></li>
+                <li><a href="#" onclick="openTrashModal(); return false;">🗑️ Trash</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <main class="hero-section">
+        <div class="hero-content">
+            <h1 class="hero-title">
+                <span class="gradient-text">Embed Your Media</span>
+                <br>Seamlessly from Google Drive
+            </h1>
+            <p class="hero-description">
+                Transform your Google Drive content into beautiful, embedded experiences. 
+                Share videos, images, and documents with style and elegance.
+            </p>
+            <div class="hero-features">
+                <div class="feature-card">
+                    <div class="feature-icon">🎥</div>
+                    <h3>Video Embedding</h3>
+                    <p>Embed videos directly from your Google Drive with custom styling</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">🖼️</div>
+                    <h3>Image Gallery</h3>
+                    <p>Create stunning image galleries with categorization and tags</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">🏷️</div>
+                    <h3>Smart Organization</h3>
+                    <p>Organize your media with categories, tags, and metadata</p>
+                </div>
+            </div>
+            <a href="embed.html" class="cta-button">
+                <span>Start Embedding</span>
+                <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                    <path d="M7.5 15L12.5 10L7.5 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+            </a>
+        </div>
+    </main>
+
+    <!-- Recent Activity Widget -->
+    <section class="recent-activity-section">
+        <div class="widget-container">
+            <div class="widget-header">
+                <h3>📌 Recent Activity</h3>
+                <button class="widget-toggle" onclick="toggleRecentActivity()">−</button>
+            </div>
+            <div id="recentActivityList" class="recent-activity-list">
+                <!-- Recent items will be inserted here -->
+            </div>
+        </div>
+    </section>
+
+    <!-- Media Statistics -->
+    <section class="stats-section">
+        <div class="stats-container">
+            <div class="stat-card">
+                <div class="stat-icon">📁</div>
+                <div class="stat-content">
+                    <h3 id="totalFiles">0</h3>
+                    <p>Total Files</p>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon">⭐</div>
+                <div class="stat-content">
+                    <h3 id="totalFavorites">0</h3>
+                    <p>Favorites</p>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon">📊</div>
+                <div class="stat-content">
+                    <h3 id="mostUsedCategory">-</h3>
+                    <p>Top Category</p>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon">👁️</div>
+                <div class="stat-content">
+                    <h3 id="totalViews">0</h3>
+                    <p>Total Views</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Media Gallery Section -->
+    <section class="media-gallery-section" id="mediaGallery">
+        <div class="gallery-container">
+            <div class="gallery-header">
+                <h2>Your Media Library</h2>
+                
+                <!-- Search Bar -->
+                <div class="search-container">
+                    <svg class="search-icon" width="20" height="20" viewBox="0 0 20 20" fill="none">
+                        <circle cx="9" cy="9" r="6" stroke="currentColor" stroke-width="2"/>
+                        <path d="M14 14L18 18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                    </svg>
+                    <input 
+                        type="text" 
+                        id="searchInput" 
+                        class="search-input" 
+                        placeholder="Search by title, category, or tags... (Ctrl+K)"
+                    >
+                    <button id="clearSearch" class="clear-search-btn" style="display: none;">
+                        <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                            <path d="M4 4L12 12M12 4L4 12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                        </svg>
+                    </button>
+                </div>
+
+                <!-- Controls Row -->
+                <div class="controls-row">
+                    <!-- Sort Options -->
+                    <div class="sort-container">
+                        <label for="sortSelect" class="sort-label">
+                            <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
+                                <path d="M3 6H15M3 12H10" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                                <path d="M13 4V14M13 14L11 12M13 14L15 12" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                            </svg>
+                            Sort:
+                        </label>
+                        <select id="sortSelect" class="sort-select">
+                            <option value="newest">Newest First</option>
+                            <option value="oldest">Oldest First</option>
+                            <option value="alphabetical">A-Z</option>
+                            <option value="alphabetical-reverse">Z-A</option>
+                            <option value="pinned">Pinned First</option>
+                            <option value="most-viewed">Most Viewed</option>
+                        </select>
+                    </div>
+
+                    <!-- View Options -->
+                    <div class="view-options">
+                        <label class="view-label">View:</label>
+                        <div class="view-buttons">
+                            <button class="view-btn active" data-view="grid" title="Grid View">
+                                <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
+                                    <rect x="2" y="2" width="6" height="6" stroke="currentColor" stroke-width="2"/>
+                                    <rect x="10" y="2" width="6" height="6" stroke="currentColor" stroke-width="2"/>
+                                    <rect x="2" y="10" width="6" height="6" stroke="currentColor" stroke-width="2"/>
+                                    <rect x="10" y="10" width="6" height="6" stroke="currentColor" stroke-width="2"/>
+                                </svg>
+                            </button>
+                            <button class="view-btn" data-view="list" title="List View">
+                                <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
+                                    <path d="M2 4H16M2 9H16M2 14H16" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Grid Size Options -->
+                    <div class="grid-size-options">
+                        <label class="view-label">Size:</label>
+                        <div class="size-buttons">
+                            <button class="size-btn" data-size="small" title="Small">S</button>
+                            <button class="size-btn active" data-size="medium" title="Medium">M</button>
+                            <button class="size-btn" data-size="large" title="Large">L</button>
+                        </div>
+                    </div>
+
+                    <!-- Fullscreen Toggle -->
+                    <button class="fullscreen-btn" onclick="toggleFullscreen()" title="Fullscreen Mode (F11)">
+                        <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                            <path d="M3 3L7 3M3 3L3 7M3 3L8 8M17 3L13 3M17 3V7M17 3L12 8M3 17L7 17M3 17L3 13M3 17L8 12M17 17L13 17M17 17V13M17 17L12 12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                        </svg>
+                    </button>
+
+                    <!-- Duplicate Detection -->
+                    <button class="action-btn" onclick="findDuplicates()" title="Find Duplicates">
+                        <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                            <rect x="3" y="3" width="10" height="10" stroke="currentColor" stroke-width="2"/>
+                            <rect x="7" y="7" width="10" height="10" stroke="currentColor" stroke-width="2"/>
+                        </svg>
+                        Find Duplicates
+                    </button>
+                </div>
+
+                <!-- Bulk Actions Bar (Hidden by default) -->
+                <div id="bulkActionsBar" class="bulk-actions-bar" style="display: none;">
+                    <div class="bulk-info">
+                        <span id="selectedCount">0</span> items selected
+                    </div>
+                    <div class="bulk-buttons">
+                        <button class="bulk-btn" onclick="bulkFavorite()">
+                            <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                                <path d="M8 2L10 6L14 6.5L11 9.5L12 14L8 11.5L4 14L5 9.5L2 6.5L6 6L8 2Z" stroke="currentColor" stroke-width="1.5"/>
+                            </svg>
+                            Favorite
+                        </button>
+                        <button class="bulk-btn" onclick="bulkPin()">
+                            <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                                <path d="M8 2V14M5 5L8 2L11 5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                            </svg>
+                            Pin
+                        </button>
+                        <button class="bulk-btn" onclick="showBulkCategoryModal()">
+                            <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                                <path d="M2 4H14M2 8H14M2 12H14" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                            </svg>
+                            Change Category
+                        </button>
+                        <button class="bulk-btn" onclick="showBulkCollectionModal()">
+                            📂 Add to Collection
+                        </button>
+                        <button class="bulk-btn delete" onclick="bulkDelete()">
+                            <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                                <path d="M2 4H14M6 2H10M6 12V7M10 12V7M3 4L4 14H12L13 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                            </svg>
+                            Delete
+                        </button>
+                        <button class="bulk-btn" onclick="clearSelection()">Clear Selection</button>
+                    </div>
+                </div>
+
+                <div class="gallery-filters">
+                    <button class="filter-btn active" data-filter="all">All</button>
+                    <button class="filter-btn" data-filter="pinned">📌 Pinned</button>
+                    <button class="filter-btn" data-filter="favorites">⭐ Favorites</button>
+                    <button class="filter-btn" data-filter="popular">🔥 Popular</button>
+                    <button class="filter-btn" data-filter="video">Videos</button>
+                    <button class="filter-btn" data-filter="image">Images</button>
+                    <button class="filter-btn" data-filter="document">Documents</button>
+                    <button class="filter-btn" data-filter="presentation">Presentations</button>
+                    <button class="filter-btn" data-filter="other">Other</button>
+                </div>
+            </div>
+            
+            <div id="searchResults" class="search-results" style="display: none;">
+                <span id="searchResultText"></span>
+                <button onclick="clearSearch()" class="clear-results-btn">Clear Search</button>
+            </div>
+
+            <div id="mediaGrid" class="media-grid view-grid size-medium">
+                <!-- Media cards will be dynamically inserted here -->
+            </div>
+            <div id="emptyState" class="empty-state">
+                <div class="empty-icon">📭</div>
+                <h3>No media yet</h3>
+                <p>Start by embedding your first media item</p>
+                <a href="embed.html" class="empty-cta">Add Media</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Context Menu -->
+    <div id="contextMenu" class="context-menu" style="display: none;">
+        <div class="context-menu-item" onclick="contextAction('view')">
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                <path d="M1 8C1 8 3.5 3 8 3C12.5 3 15 8 15 8C15 8 12.5 13 8 13C3.5 13 1 8 1 8Z" stroke="currentColor" stroke-width="2"/>
+                <circle cx="8" cy="8" r="2" stroke="currentColor" stroke-width="2"/>
+            </svg>
+            View
+        </div>
+        <div class="context-menu-item" onclick="contextAction('edit')">
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                <path d="M11.5 2L14 4.5L5 13.5L2 14L2.5 11L11.5 2Z" stroke="currentColor" stroke-width="2"/>
+            </svg>
+            Edit
+        </div>
+        <div class="context-menu-item" onclick="contextAction('favorite')">⭐ Toggle Favorite</div>
+        <div class="context-menu-item" onclick="contextAction('pin')">📌 Toggle Pin</div>
+        <div class="context-menu-item" onclick="contextAction('addToCollection')">📂 Add to Collection</div>
+        <div class="context-menu-divider"></div>
+        <div class="context-menu-item" onclick="contextAction('duplicate')">📋 Duplicate</div>
+        <div class="context-menu-item" onclick="contextAction('recommendations')">💡 Similar Items</div>
+        <div class="context-menu-divider"></div>
+        <div class="context-menu-item danger" onclick="contextAction('delete')">
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                <path d="M2 4H14M6 2H10M6 12V7M10 12V7M3 4L4 14H12L13 4" stroke="currentColor" stroke-width="2"/>
+            </svg>
+            Delete
+        </div>
+    </div>
+
+    <!-- MODALS START HERE -->
+    
+    <!-- Edit Modal -->
+    <div id="editModal" class="media-modal">
+        <div class="modal-content">
+            <button class="modal-close" onclick="closeEditModal()">&times;</button>
+            <div class="form-header">
+                <h2>Edit Media</h2>
+                <p>Update your media details</p>
+            </div>
+            <form id="editForm" class="embed-form">
+                <input type="hidden" id="editMediaId">
+                
+                <div class="form-group">
+                    <label for="editIframeCode">
+                        <span class="label-text">Iframe Code</span>
+                        <span class="label-required">*</span>
+                    </label>
+                    <textarea 
+                        id="editIframeCode" 
+                        rows="4" 
+                        placeholder='<iframe src="..." width="640" height="480"></iframe>'
+                        required
+                    ></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label for="editMediaTitle">
+                        <span class="label-text">Media Title</span>
+                        <span class="label-required">*</span>
+                    </label>
+                    <input 
+                        type="text" 
+                        id="editMediaTitle" 
+                        placeholder="Enter a descriptive title"
+                        required
+                    >
+                </div>
+
+                <div class="form-group">
+                    <label for="editMediaDescription">
+                        <span class="label-text">Description</span>
+                    </label>
+                    <textarea 
+                        id="editMediaDescription" 
+                        rows="3" 
+                        placeholder="Add a description for this media (optional)"
+                    ></textarea>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="editCategoryInput">
+                            <span class="label-text">Category</span>
+                            <span class="label-required">*</span>
+                        </label>
+                        <div class="editable-select-wrapper">
+                            <input 
+                                type="text" 
+                                id="editCategoryInput" 
+                                list="editCategoryList"
+                                placeholder="Select or type a category"
+                                required
+                            >
+                            <datalist id="editCategoryList">
+                                <option value="video">
+                                <option value="image">
+                                <option value="document">
+                                <option value="presentation">
+                                <option value="other">
+                            </datalist>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="editTags">
+                            <span class="label-text">Tags / Keywords</span>
+                        </label>
+                        <input 
+                            type="text" 
+                            id="editTags" 
+                            placeholder="e.g., tutorial, marketing, presentation"
+                        >
+                    </div>
+                </div>
+
+                <div style="display: flex; gap: 1rem;">
+                    <button type="submit" class="submit-button" style="flex: 1;">
+                        <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                            <path d="M5 10L8.5 13.5L15 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                        <span>Save Changes</span>
+                    </button>
+                    <button type="button" class="clear-button" onclick="closeEditModal()" style="flex: 0.4;">
+                        Cancel
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Bulk Category Change Modal -->
+    <div id="bulkCategoryModal" class="media-modal">
+        <div class="modal-content" style="max-width: 500px;">
+            <button class="modal-close" onclick="closeBulkCategoryModal()">&times;</button>
+            <div class="form-header">
+                <h2>Change Category</h2>
+                <p>Select a new category for selected items</p>
+            </div>
+            <div class="category-grid">
+                <button class="category-option" onclick="applyBulkCategory('video')">
+                    🎥 Video
+                </button>
+                <button class="category-option" onclick="applyBulkCategory('image')">
+                    🖼️ Image
+                </button>
+                <button class="category-option" onclick="applyBulkCategory('document')">
+                    📄 Document
+                </button>
+                <button class="category-option" onclick="applyBulkCategory('presentation')">
+                    📊 Presentation
+                </button>
+                <button class="category-option" onclick="applyBulkCategory('other')">
+                    📁 Other
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Collections Modal -->
+    <div id="collectionsModal" class="media-modal">
+        <div class="modal-content" style="max-width: 900px;">
+            <button class="modal-close" onclick="closeCollectionsModal()">&times;</button>
+            <div class="form-header">
+                <h2>📂 Collections</h2>
+                <p>Organize your media into collections</p>
+            </div>
+            
+            <div class="collections-container">
+                <button class="create-collection-btn" onclick="showCreateCollectionForm()">
+                    <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                        <path d="M10 5V15M5 10H15" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                    </svg>
+                    Create New Collection
+                </button>
+                
+                <div id="createCollectionForm" class="create-collection-form" style="display: none;">
+                    <input type="text" id="newCollectionName" placeholder="Collection name..." class="collection-input">
+                    <textarea id="newCollectionDesc" placeholder="Description (optional)" rows="2" class="collection-input"></textarea>
+                    <div style="display: flex; gap: 0.5rem;">
+                        <button onclick="createCollection()" class="submit-button" style="flex: 1;">Create</button>
+                        <button onclick="hideCreateCollectionForm()" class="clear-button">Cancel</button>
+                    </div>
+                </div>
+                
+                <div id="collectionsList" class="collections-list">
+                    <!-- Collections will be inserted here -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Analytics Modal -->
+    <div id="analyticsModal" class="media-modal">
+        <div class="modal-content" style="max-width: 1000px;">
+            <button class="modal-close" onclick="closeAnalyticsModal()">&times;</button>
+            <div class="form-header">
+                <h2>📊 Analytics Dashboard</h2>
+                <p>Insights about your media library</p>
+            </div>
+            
+            <div class="analytics-container">
+                <div class="analytics-grid">
+                    <div class="analytics-card">
+                        <h3>Most Viewed Items</h3>
+                        <div id="mostViewedList" class="analytics-list"></div>
+                    </div>
+                    
+                    <div class="analytics-card">
+                        <h3>Recently Viewed</h3>
+                        <div id="recentlyViewedList" class="analytics-list"></div>
+                    </div>
+                    
+                    <div class="analytics-card">
+                        <h3>Category Distribution</h3>
+                        <div id="categoryChart" class="category-chart"></div>
+                    </div>
+                    
+                    <div class="analytics-card">
+                        <h3>Activity Heatmap</h3>
+                        <div id="activityHeatmap" class="activity-heatmap"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Trash Modal -->
+    <div id="trashModal" class="media-modal">
+        <div class="modal-content" style="max-width: 900px;">
+            <button class="modal-close" onclick="closeTrashModal()">&times;</button>
+            <div class="form-header">
+                <h2>🗑️ Trash</h2>
+                <p>Deleted items are kept for 30 days</p>
+            </div>
+            
+            <div class="trash-actions">
+                <button onclick="emptyTrash()" class="clear-button">Empty Trash</button>
+            </div>
+            
+            <div id="trashList" class="trash-list">
+                <!-- Trash items will be inserted here -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Recommendations Modal -->
+    <div id="recommendationsModal" class="media-modal">
+        <div class="modal-content" style="max-width: 800px;">
+            <button class="modal-close" onclick="closeRecommendationsModal()">&times;</button>
+            <div class="form-header">
+                <h2>💡 Similar Items</h2>
+                <p id="recommendationsTitle">Items similar to...</p>
+            </div>
+            
+            <div id="recommendationsList" class="recommendations-list">
+                <!-- Recommendations will be inserted here -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Duplicates Modal -->
+    <div id="duplicatesModal" class="media-modal">
+        <div class="modal-content" style="max-width: 800px;">
+            <button class="modal-close" onclick="closeDuplicatesModal()">&times;</button>
+            <div class="form-header">
+                <h2>🔍 Duplicate Detection</h2>
+                <p id="duplicatesCount">Found duplicates</p>
+            </div>
+            
+            <div id="duplicatesList" class="duplicates-list">
+                <!-- Duplicates will be inserted here -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Bulk Collection Modal -->
+    <div id="bulkCollectionModal" class="media-modal">
+        <div class="modal-content" style="max-width: 500px;">
+            <button class="modal-close" onclick="closeBulkCollectionModal()">&times;</button>
+            <div class="form-header">
+                <h2>Add to Collection</h2>
+                <p>Select a collection for selected items</p>
+            </div>
+            <div id="bulkCollectionList" class="collection-select-list">
+                <!-- Collections will be inserted here -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Playlist Modal -->
+    <div id="playlistModal" class="media-modal">
+        <div class="modal-content playlist-modal-content">
+            <button class="modal-close" onclick="closePlaylistModal()">&times;</button>
+            <div class="playlist-header">
+                <h2 id="playlistTitle">Collection Playlist</h2>
+                <div class="playlist-controls">
+                    <button class="playlist-btn" onclick="previousVideo()">⏮️ Previous</button>
+                    <button class="playlist-btn" onclick="nextVideo()">Next ⏭️</button>
+                    <button class="playlist-btn" onclick="toggleAutoplay()">
+                        <span id="autoplayText">▶️ Autoplay: OFF</span>
+                    </button>
+                </div>
+            </div>
+            <div id="playlistPlayer" class="playlist-player">
+                <!-- Current video will play here -->
+            </div>
+            <div class="playlist-queue">
+                <h3>Up Next (<span id="queueCount">0</span>)</h3>
+                <div id="playlistQueue" class="playlist-items">
+                    <!-- Playlist items will be inserted here -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Keyboard Shortcuts Help -->
+    <div id="shortcutsModal" class="media-modal">
+        <div class="modal-content" style="max-width: 600px;">
+            <button class="modal-close" onclick="closeShortcutsModal()">&times;</button>
+            <div class="form-header">
+                <h2>⌨️ Keyboard Shortcuts</h2>
+                <p>Master these shortcuts to work faster</p>
+            </div>
+            <div class="shortcuts-list">
+                <div class="shortcut-item">
+                    <kbd>Ctrl/Cmd</kbd> + <kbd>K</kbd>
+                    <span>Focus Search</span>
+                </div>
+                <div class="shortcut-item">
+                    <kbd>Esc</kbd>
+                    <span>Close Modals / Clear Search</span>
+                </div>
+                <div class="shortcut-item">
+                    <kbd>?</kbd>
+                    <span>Show this help</span>
+                </div>
+                <div class="shortcut-item">
+                    <kbd>Ctrl/Cmd</kbd> + <kbd>A</kbd>
+                    <span>Select All Items</span>
+                </div>
+                <div class="shortcut-item">
+                    <kbd>F11</kbd>
+                    <span>Toggle Fullscreen</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Floating Help Button -->
+    <button class="help-button" onclick="openShortcutsModal()" title="Keyboard Shortcuts (?)">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+            <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2"/>
+            <path d="M12 16V16.5M12 8C10.5 8 9.5 9 9.5 10C9.5 11 10.5 11.5 11.5 12C12.5 12.5 12 13.5 12 14" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+        </svg>
+    </button>
+
+    <footer class="footer">
+        <p>&copy; 2025 MediaEmbed. Crafted with excellence.</p>
+    </footer>
+
+    <script src="script.js"></script>
+    
+    <!-- PWA Service Worker Registration -->
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('sw.js')
+                    .then(reg => console.log('✅ Service Worker registered'))
+                    .catch(err => console.log('❌ Service Worker registration failed:', err));
+            });
+        }
+    </script>
+</body>
+</html>
